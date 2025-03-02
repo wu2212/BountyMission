@@ -41,6 +41,8 @@
 <script>
 import { ref } from 'vue';
 import axios from 'axios';
+import { useAuthStore } from '@/store';
+import { useRouter } from 'vue-router';
 
 export default {
   setup() {
@@ -48,7 +50,7 @@ export default {
     const password = ref('');
     const isLoading = ref(false);
     const errorMessage = ref('');
-
+    const router = useRouter();
     const handleLogin = async () => {
       errorMessage.value = ''; // 清空错误提示
       isLoading.value = true;
@@ -60,7 +62,11 @@ export default {
           password: password.value,
         });
 
-        console.log('登录成功:', response.data);
+        console.log('登录成功:', response.data.data);
+        const authStore = useAuthStore();
+        authStore.setToken(response.data.data);
+        console.log(authStore.getToken)
+        router.push('/home')
         // 登录成功后的逻辑，例如跳转到首页
       } catch (error) {
         // 处理登录失败

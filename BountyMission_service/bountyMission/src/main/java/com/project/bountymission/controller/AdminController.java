@@ -14,6 +14,7 @@ import java.util.Map;
 //@CrossOrigin
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin
 public class AdminController {
 
     @Autowired
@@ -22,7 +23,7 @@ public class AdminController {
     @PostMapping("/login")
     public Result login(@RequestBody Admin admin) {
         System.out.println("接收前端请求");
-        System.out.println(admin);
+        System.out.println(admin.getUsername()+" "+admin.getPassword());
 
         Admin loginadmin = adminService.login(admin);
         if (loginadmin != null) {
@@ -37,5 +38,10 @@ public class AdminController {
         else {
             return Result.fail("登录失败，账号或密码错误");
         }
+    }
+
+    @GetMapping("/find")
+    public Result find() {
+        return Result.success();
     }
 }
