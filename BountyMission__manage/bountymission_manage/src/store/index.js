@@ -1,8 +1,28 @@
-// src/stores/index.js
-import { createPinia } from 'pinia';
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+// src/stores/authStore.js
+import { defineStore } from 'pinia';
 
-const pinia = createPinia();
-pinia.use(piniaPluginPersistedstate);
+export const useAuthStore = defineStore('auth', {
+  // 定义状态
+  state: () => ({
+    token: null, // 初始 token 为 null
+  }),
 
-export default pinia;
+  // 定义获取器（计算属性）
+  getters: {
+    // 获取 token
+    getToken: (state) => state.token,
+  },
+
+  // 定义操作方法
+  actions: {
+    // 设置 token
+    setToken(newToken) {
+      this.token = newToken;
+    },
+
+    // 清除 token
+    clearToken() {
+      this.token = null;
+    },
+  },
+});

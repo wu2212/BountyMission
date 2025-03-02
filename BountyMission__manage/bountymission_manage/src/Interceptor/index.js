@@ -1,27 +1,22 @@
-// src/api/axios.js
+// src/axios.js
 import axios from 'axios';
-import { useAuthStore } from '@/stores/auth'; // 假设你已经创建了 auth Store
+import { useAuthStore } from '@/stores/authStore';
 
-const authStore = useAuthStore();
-const service = axios.create({
-  baseURL: '/api', // 替换为你的 API 基地址
-  timeout: 5000 // 请求超时时间
+// 创建 Axios 实例
+const api = axios.create({
+  baseURL: 'http://localhost:8080', // 后端 API 的基础路径
+  timeout: 5000, // 请求超时时间
 });
 
 // 请求拦截器
-service.interceptors.request.use(
+api.interceptors.request.use(
   (config) => {
-    // 如果是登录请求，不需要 Token
-    if (config.url?.includes('/login')) {
-      return config;
-    }
+    const authStore = useAuthStore(); // 获取 Pinia store
+    const token = authStore.getToken; // 从 Pinia 中获取 token
 
-    // 从 Store 中获取 Token
-    const token = authStore.token;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['Authorization'] = `Bearer ${token}`; // 将 token 添加到请求头
     }
-
     return config;
   },
   (error) => {
@@ -30,27 +25,20 @@ service.interceptors.request.use(
 );
 
 // 响应拦截器
-service.interceptors.response.use(
+api.interceptors.response.use(
   (response) => {
-    // 如果响应中包含新的 Token，更新 Store
-    if (response.data.token) {
-      authStore.setToken(response.data.token);
-    }
+    const authStore = useAuthStore(); // 获取 Pinia store
+    const newToken = response.headers['new-token']; // 假设后端在响应头中返回新的 token
 
+    if (newToken) {
+      authStore.setToken(newToken); // 将新的 token 存储到 Pinia 中
+    }
     return response;
   },
-  async (error) => {
-    const { response } = error;
-
-    if (response && response.status === 401) {
-      // Token 过期，可以在这里处理（例如跳转到登录页）
-      authStore.clearToken(); // 清除 Token
-      // 重定向到登录页
-      window.location.href = '/login';
-    }
-
+  (error) => {
+    // 处理响应错误（如 401、500 等）
     return Promise.reject(error);
   }
 );
 
-export default service;
+export default api;
