@@ -2,12 +2,16 @@ package com.project.bountymission.controller;
 
 import com.project.bountymission.mapper.UserMapper;
 import com.project.bountymission.pojo.Result;
+import com.project.bountymission.pojo.dto.UserLoginDto;
 import com.project.bountymission.pojo.dto.UserRegisterDto;
+import com.project.bountymission.pojo.dto.UserSmsLoginDto;
 import com.project.bountymission.pojo.entity.School;
 import com.project.bountymission.service.UserService;
+import com.project.bountymission.utils.PasswordUtil;
 import com.project.bountymission.utils.SmsService;
 import org.apache.ibatis.annotations.Insert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +27,8 @@ public class UserController {
     @Autowired
     private SmsService smsService;
 
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     /**
      * 查询学校名单
      * @param keyword
@@ -31,13 +36,7 @@ public class UserController {
      */
     @GetMapping("/school")
     public Result<List<School>> getSchool(@RequestParam() String keyword) {
-      /*  String phone = "17508230617";
-        smsService.sendVerificationCode(phone);*/
         List<School> schoolList = userService.schoolList(keyword);
-        /*System.out.println(schoolList.size());
-        for (School school : schoolList) {
-            System.out.println(school.getSchoolName());
-        }*/
         return Result.success(schoolList);
     }
 
@@ -59,15 +58,25 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<String> register(@RequestBody UserRegisterDto userRegisterDto) {
-        Integer codeint = userRegisterDto.getCode();
-        String code = String.valueOf(codeint);
-        String phone = userRegisterDto.getUsername();
-        boolean b = smsService.verifyCode(phone, code);
-        if (b){
-            System.out.println("验证码验证成功");
-            return Result.success();
-        }else {
-            return Result.fail("登录失败");
-        }
+        userService.userRegister(userRegisterDto);
+      return Result.success("注册成功，请登录");
+    }
+
+    /**|
+     * 账号密码登录
+     */
+    @PostMapping("/login")
+    public Result login(@RequestBody UserLoginDto userLoginDto) {
+        userService.login(userLoginDto);
+        return Result.success("登录成功");
+    }
+
+    /**
+     * 短信验证码登录
+     */
+    @PostMapping("/smslogin")
+    public Result smsLogin(@RequestBody UserSmsLoginDto userSmsLoginDto) {
+        userService.smslogin(userSmsLoginDto);
+        return Result.success();
     }
 }

@@ -106,9 +106,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
-import { SchoolList ,SmsCode,register} from '@/api/user/login'
 
+import { SchoolList ,SmsCode,register,login,smslogin} from '@/api/user/login'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 // 登录相关
 const activeTab = ref('account')
 const loginForm = reactive({
@@ -244,18 +245,23 @@ const handleRegister = async () => {
 const handleLogin = async () => {
   try {
     await loginFormRef.value.validate()
-    await axios.post('/api/login', loginForm)
+    await login(loginForm)
+    router.push('/home')
     ElMessage.success('登录成功')
   } catch (error) {
-    ElMessage.error('登录失败')
+    console.log(error
+      
+    )
+    ElMessage.error()
   }
 }
-
+//短信验证码登录
 const handleSmsLogin = async () => {
   try {
     await smsFormRef.value.validate()
-    await axios.post('/api/sms-login', smsForm)
+    await smslogin(smsForm)
     ElMessage.success('登录成功')
+    router.push('/home')
   } catch (error) {
     ElMessage.error('登录失败')
   }

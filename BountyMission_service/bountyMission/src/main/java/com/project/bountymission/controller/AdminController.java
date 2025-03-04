@@ -36,7 +36,7 @@ public class AdminController {
             return Result.success(token);
         }
         else {
-            return Result.fail("登录失败，账号或密码错误");
+            return Result.error("登录失败，账号或密码错误");
         }
     }
 

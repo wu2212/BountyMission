@@ -39,7 +39,10 @@ public class Result<T> {
     }
 
     // 失败响应的工厂方法
-    public static <T> Result<T> fail(String message) {
+    public static <T> Result<T> error(String message) {
+        return new Result<>(FAIL_CODE, message, null);
+    }
+    public static <T> Result<T> error(Integer code, String message) {
         return new Result<>(FAIL_CODE, message, null);
     }
 

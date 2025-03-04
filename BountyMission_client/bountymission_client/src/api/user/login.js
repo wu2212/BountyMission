@@ -10,7 +10,15 @@ export const SchoolList = (keyword) => {
 export const SmsCode = (phone) => {
   return api.post("/user/sms",{ phone })
 }
-
+//注册
 export const register = (registerForm) => {
   return api.post("/user/register",registerForm)
+}
+//账号密码登录
+export const login = (loginForm) => {
+  return api.post("/user/login",loginForm)
+}
+//短信验证码登录
+export const smslogin = (smsForm) => {
+  return api.post("/user/smslogin",smsForm)
 }

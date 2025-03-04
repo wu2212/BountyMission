@@ -25,6 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
                 "/admin/login",
                 "/user/school",
                 "/user/sms",
+                "/user/smslogin",
                 "/upload");
     }
 }

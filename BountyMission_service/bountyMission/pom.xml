@@ -102,7 +102,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-
+        <!--加密工具依赖-->
+        <dependency>
+            <groupId>de.mkammerer</groupId>
+            <artifactId>argon2-jvm</artifactId>
+            <version>2.11</version> <!-- 检查最新版本 -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>6.1.7</version> <!-- 或与你的 Spring Boot 版本匹配 -->
+        </dependency>
     </dependencies>
 
     <build>
