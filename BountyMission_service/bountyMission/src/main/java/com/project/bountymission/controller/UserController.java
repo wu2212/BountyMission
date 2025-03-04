@@ -30,7 +30,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/school")
-    public Result<List<School>> getSchool(@RequestParam String keyword) {
+    public Result<List<School>> getSchool(@RequestParam() String keyword) {
       /*  String phone = "17508230617";
         smsService.sendVerificationCode(phone);*/
         List<School> schoolList = userService.schoolList(keyword);
@@ -49,6 +49,7 @@ public class UserController {
     @PostMapping("/sms")
     public Result<String> sendSms(@RequestBody Map<String, Object> params) {
         String phone = (String) params.get("phone");
+        smsService.sendVerificationCode(phone);
         System.out.println(phone);
         return Result.success();
     }
@@ -58,9 +59,15 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<String> register(@RequestBody UserRegisterDto userRegisterDto) {
-        System.out.println(userRegisterDto.getCode());
-        System.out.println(userRegisterDto.toString());
-
-        return Result.success();
+        Integer codeint = userRegisterDto.getCode();
+        String code = String.valueOf(codeint);
+        String phone = userRegisterDto.getUsername();
+        boolean b = smsService.verifyCode(phone, code);
+        if (b){
+            System.out.println("验证码验证成功");
+            return Result.success();
+        }else {
+            return Result.fail("登录失败");
+        }
     }
 }

@@ -4,13 +4,16 @@ import com.cloopen.rest.sdk.BodyType;
 import com.cloopen.rest.sdk.CCPRestSmsSDK;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.random.RandomGenerator;
 
 @Service
@@ -19,8 +22,10 @@ public class SmsService {
     @Autowired
     private CCPRestSmsSDK smsSDK;
 
-    // 使用内存临时存储验证码（仅供测试）
-    private static final Map<String, String> codeStore = new ConcurrentHashMap<>();
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    private static final String SMS_CODE_KEY = "sms:code:";
 
     @Value("${sms.template-id}")
     private String templateId;
@@ -43,30 +48,57 @@ public class SmsService {
         String to = phone;
         String templateId= "1";
         Long expire = 2l;
-        String[] datas = {"5200",expire.toString()};
+        String code = generateRandomCode();
+        String[] datas = {code,expire.toString()};
         //HashMap<String, Object> result = sdk.sendTemplateSMS(to,templateId,datas);
         HashMap<String, Object> result = sdk.sendTemplateSMS(to,templateId,datas);
-        if("000000".equals(result.get("statusCode"))){
+        if("000000".equals(result.get("statusCode"))) {
             //正常返回输出data包体信息（map）
-            HashMap<String,Object> data = (HashMap<String, Object>) result.get("data");
+            HashMap<String, Object> data = (HashMap<String, Object>) result.get("data");
             Set<String> keySet = data.keySet();
             for(String key:keySet){
                 Object object = data.get(key);
                 System.out.println(key +" = "+object);
             }
+            //存储验证码到redis
+            String key = SMS_CODE_KEY + phone;
+            redisTemplate.opsForValue().set(
+                    key,
+                    code,
+                    2, TimeUnit.MINUTES // 设置过期时间
+            );
+            System.out.println("短信验证码已存储，手机号："+phone+"，验证码：" +code);
         }else{
             //异常返回输出错误码和错误信息
             System.out.println("错误码=" + result.get("statusCode") +" 错误信息= "+result.get("statusMsg"));
         }
     }
 
-    // 验证码校验方法（内存版）
-    public boolean validateCode(String phone, String code) {
-        String storedCode = codeStore.get(phone);
-        return code != null && code.equals(storedCode);
-    }
+
 
     private String generateRandomCode() {
-        return String.valueOf((int)((Math.random() * 9 + 1) * 100000));
+        SecureRandom random = new SecureRandom();
+        return String.format("%04d", random.nextInt(10000)); // 注意参数改为10000
+    }
+
+    //验证码校验方法
+    public boolean verifyCode(String phone, String inputCode) {
+        String key = SMS_CODE_KEY + phone;
+        String storedCode = redisTemplate.opsForValue().get(key);
+
+        if (storedCode == null) {
+            System.out.println("验证码已过期或未发送");
+            return false;
+        }
+
+        if (!storedCode.equals(inputCode)) {
+            System.out.println("验证码不匹配");
+            return false;
+        }
+
+        // 验证成功后删除key（使用del命令保证原子性）
+        System.out.println("验证码验证成功");
+        redisTemplate.delete(key);
+        return true;
     }
 }
