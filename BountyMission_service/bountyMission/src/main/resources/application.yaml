@@ -7,3 +7,17 @@ spring:
     url: jdbc:mysql://localhost:3306/bountymission
     username: root
     password: 123456
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+
+sms:
+  account-sid: 2c94811c946f6bfb01955b1e43842383
+  auth-token: 4bf722635d16490284916790c0e1fe77
+  app-id: 2c94811c946f6bfb01955b1e4547238a
+  server-ip: app.cloopen.com
+  server-port: 8883
+  template-id: 1

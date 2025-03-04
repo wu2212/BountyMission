@@ -92,6 +92,11 @@
             <version>1.18.30</version> <!-- 这里需要换成最新版本 -->
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.cloopen</groupId>
+            <artifactId>java-sms-sdk</artifactId>
+            <version>1.0.4</version>
+        </dependency>
     </dependencies>
 
     <build>
